@@ -1,0 +1,1234 @@
+<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hong Kong Weather Forecast</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --sunny-color: #f39c12;
+            --rainy-color: #3498db;
+            --cloudy-color: #7f8c8d;
+            --partly-cloudy-color: #95a5a6;
+            --light-rain-color: #3498db80;
+            --heavy-rain-color: #2c3e50;
+            --storm-color: #8e44ad;
+            --typhoon-color: #c0392b;
+            --text-color: #2c3e50;
+            --background-color: #ecf0f1;
+            --card-background: white;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --warning-bg: #f8d7da;
+            --warning-border: #f5c6cb;
+            --warning-text: #721c24;
+            --alert-bg: #fff3cd;
+            --alert-border: #ffeeba;
+            --alert-text: #856404;
+            --info-bg: #d1ecf1;
+            --info-border: #bee5eb;
+            --info-text: #0c5460;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px var(--shadow-color);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        .weather-alerts {
+            margin-bottom: 30px;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .alert-icon {
+            font-size: 24px;
+            margin-right: 15px;
+        }
+        
+        .alert-content {
+            flex: 1;
+        }
+        
+        .alert-title {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .alert-message {
+            font-size: 14px;
+        }
+        
+        .alert-warning {
+            background-color: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            color: var(--warning-text);
+        }
+        
+        .alert-caution {
+            background-color: var(--alert-bg);
+            border: 1px solid var(--alert-border);
+            color: var(--alert-text);
+        }
+        
+        .alert-info {
+            background-color: var(--info-bg);
+            border: 1px solid var(--info-border);
+            color: var(--info-text);
+        }
+        
+        .control-panel {
+            background-color: var(--card-background);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .model-selector {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .model-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .model-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .model-btn.active {
+            background-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
+        }
+        
+        .days-control {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        label {
+            font-weight: 600;
+        }
+        
+        select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .forecast-card {
+            background-color: var(--card-background);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .forecast-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px var(--shadow-color);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .date {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .weather-icon {
+            font-size: 36px;
+        }
+        
+        .temperature {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .high-low {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+        
+        .condition {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding: 8px 12px;
+            border-radius: 5px;
+            text-align: center;
+            color: white;
+        }
+        
+        .condition.sunny {
+            background-color: var(--sunny-color);
+        }
+        
+        .condition.rainy {
+            background-color: var(--rainy-color);
+        }
+        
+        .condition.light-rain {
+            background-color: var(--light-rain-color);
+        }
+        
+        .condition.cloudy {
+            background-color: var(--cloudy-color);
+        }
+        
+        .condition.partly-cloudy {
+            background-color: var(--partly-cloudy-color);
+        }
+        
+        .condition.heavy-rain {
+            background-color: var(--heavy-rain-color);
+        }
+        
+        .condition.thunderstorm {
+            background-color: var(--storm-color);
+        }
+        
+        .condition.typhoon {
+            background-color: var(--typhoon-color);
+        }
+        
+        .details {
+            margin-top: auto;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .detail-label {
+            color: #7f8c8d;
+        }
+        
+        .advice {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-style: italic;
+        }
+        
+        .warning-badge {
+            display: inline-block;
+            background-color: #e74c3c;
+            color: white;
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+        
+        .model-info {
+            background-color: var(--card-background);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            margin-top: 30px;
+        }
+        
+        .model-info h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .model-metrics {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        .metric {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 24px;
+            color: #7f8c8d;
+        }
+        
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .control-panel {
+                flex-direction: column;
+                gap: 20px;
+                align-items: flex-start;
+            }
+            
+            .model-selector, .days-control {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Hong Kong Weather Forecast</h1>
+            <div class="subtitle">Powered by Machine Learning</div>
+        </header>
+        
+        <div class="weather-alerts" id="alerts-container">
+            <!-- Weather alerts will be inserted here -->
+        </div>
+        
+        <div class="control-panel">
+            <div class="model-selector">
+                <button class="model-btn active" data-model="logistic">Logistic Regression</button>
+                <button class="model-btn" data-model="knn">K-Nearest Neighbors</button>
+                <button class="model-btn" data-model="hmm">Hidden Markov Model</button>
+                <button class="model-btn" data-model="nn">Neural Network</button>
+            </div>
+            
+            <div class="days-control">
+                <label for="days">Forecast Days:</label>
+                <select id="days">
+                    <option value="5">5 Days</option>
+                    <option value="7" selected="">7 Days</option>
+                    <option value="12">12 Days</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="forecast-grid" id="forecast-container">
+            <!-- Forecast cards will be inserted here by JavaScript -->
+        </div>
+        
+        <div class="model-info">
+            <h2 id="model-name">Logistic Regression Model</h2>
+            <p id="model-description">This model uses logistic regression to classify weather conditions based on atmospheric measurements. It performs well for forecasting general weather patterns.</p>
+            
+            <div class="model-metrics">
+                <div class="metric">
+                    <div class="metric-label">Accuracy</div>
+                    <div class="metric-value" id="accuracy">85.2%</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">AUROC Score</div>
+                    <div class="metric-value" id="auroc">0.923</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Precision</div>
+                    <div class="metric-value" id="precision">0.837</div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Hong Kong Weather Forecast Application © 2025</p>
+            <p>Data source: Hong Kong Observatory | Last updated: April 19, 2025</p>
+        </footer>
+    </div>
+
+    <script>
+        // Sample forecast data for each model
+        // In a real application, this would be fetched from a backend API
+        const forecastModels = {
+            logistic: [
+                {
+                    date: "2025-04-19",
+                    temperature: 24.7,
+                    highTemp: 27.9,
+                    lowTemp: 23.1,
+                    condition: "Sunny",
+                    humidity: 68,
+                    windSpeed: 10,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "It will be sunny, so wear sunscreen!"
+                },
+                {
+                    date: "2025-04-20",
+                    temperature: 25.2,
+                    highTemp: 28.5,
+                    lowTemp: 23.4,
+                    condition: "Sunny",
+                    humidity: 65,
+                    windSpeed: 9,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Perfect beach day! Don't forget sun protection."
+                },
+                {
+                    date: "2025-04-21",
+                    temperature: 26.1,
+                    highTemp: 29.3,
+                    lowTemp: 24.2,
+                    condition: "Partly Cloudy",
+                    humidity: 70,
+                    windSpeed: 12,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Partly cloudy conditions expected."
+                },
+                {
+                    date: "2025-04-22",
+                    temperature: 25.8,
+                    highTemp: 28.9,
+                    lowTemp: 24.1,
+                    condition: "Cloudy",
+                    humidity: 75,
+                    windSpeed: 15,
+                    precipitation: 0,
+                    warnings: ["Heat"],
+                    advice: "High UV index despite cloud cover. Stay hydrated."
+                },
+                {
+                    date: "2025-04-23",
+                    temperature: 25.3,
+                    highTemp: 28.0,
+                    lowTemp: 23.8,
+                    condition: "Light Rain",
+                    humidity: 82,
+                    windSpeed: 18,
+                    precipitation: 7.2,
+                    warnings: [],
+                    advice: "Bring an umbrella!"
+                },
+                {
+                    date: "2025-04-24",
+                    temperature: 23.9,
+                    highTemp: 26.5,
+                    lowTemp: 22.6,
+                    condition: "Rainy",
+                    humidity: 88,
+                    windSpeed: 22,
+                    precipitation: 20.5,
+                    warnings: ["Flood"],
+                    advice: "Heavy rain may cause localized flooding. Avoid low-lying areas."
+                },
+                {
+                    date: "2025-04-25",
+                    temperature: 22.7,
+                    highTemp: 24.8,
+                    lowTemp: 21.5,
+                    condition: "Heavy Rain",
+                    humidity: 92,
+                    windSpeed: 28,
+                    precipitation: 35.3,
+                    warnings: ["Flood", "Storm"],
+                    advice: "Severe weather expected. Stay indoors if possible."
+                },
+                {
+                    date: "2025-04-26",
+                    temperature: 22.0,
+                    highTemp: 24.2,
+                    lowTemp: 21.1,
+                    condition: "Thunderstorm",
+                    humidity: 90,
+                    windSpeed: 32,
+                    precipitation: 42.7,
+                    warnings: ["Flood", "Storm"],
+                    advice: "Dangerous thunderstorms expected. Stay indoors and away from windows."
+                },
+                {
+                    date: "2025-04-27",
+                    temperature: 23.2,
+                    highTemp: 25.9,
+                    lowTemp: 21.8,
+                    condition: "Rainy",
+                    humidity: 85,
+                    windSpeed: 25,
+                    precipitation: 28.1,
+                    warnings: ["Flood"],
+                    advice: "Continued rain may exacerbate flooding. Follow local advisories."
+                },
+                {
+                    date: "2025-04-28",
+                    temperature: 24.5,
+                    highTemp: 27.1,
+                    lowTemp: 22.6,
+                    condition: "Light Rain",
+                    humidity: 78,
+                    windSpeed: 18,
+                    precipitation: 12.3,
+                    warnings: [],
+                    advice: "Rain is easing, but some roads may still be affected."
+                },
+                {
+                    date: "2025-04-29",
+                    temperature: 25.2,
+                    highTemp: 28.0,
+                    lowTemp: 23.4,
+                    condition: "Partly Cloudy",
+                    humidity: 72,
+                    windSpeed: 14,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Weather is improving. Good day for outdoor activities."
+                },
+                {
+                    date: "2025-04-30",
+                    temperature: 25.8,
+                    highTemp: 28.7,
+                    lowTemp: 23.9,
+                    condition: "Sunny",
+                    humidity: 68,
+                    windSpeed: 12,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Sunny and pleasant. Perfect for outdoor activities."
+                }
+            ],
+            knn: [
+                {
+                    date: "2025-04-19",
+                    temperature: 24.2,
+                    highTemp: 27.4,
+                    lowTemp: 22.8,
+                    condition: "Sunny",
+                    humidity: 70,
+                    windSpeed: 11,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "It will be sunny, so wear sunscreen!"
+                },
+                {
+                    date: "2025-04-20",
+                    temperature: 24.8,
+                    highTemp: 28.1,
+                    lowTemp: 23.2,
+                    condition: "Sunny",
+                    humidity: 67,
+                    windSpeed: 10,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Clear skies and warm temperatures expected."
+                },
+                {
+                    date: "2025-04-21",
+                    temperature: 25.5,
+                    highTemp: 28.9,
+                    lowTemp: 23.8,
+                    condition: "Partly Cloudy",
+                    humidity: 72,
+                    windSpeed: 13,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Partly cloudy conditions expected."
+                },
+                {
+                    date: "2025-04-22",
+                    temperature: 26.2,
+                    highTemp: 29.5,
+                    lowTemp: 24.3,
+                    condition: "Partly Cloudy",
+                    humidity: 75,
+                    windSpeed: 16,
+                    precipitation: 0,
+                    warnings: ["Heat"],
+                    advice: "Unusually high temperatures. Stay hydrated and use sun protection."
+                },
+                {
+                    date: "2025-04-23",
+                    temperature: 24.8,
+                    highTemp: 27.6,
+                    lowTemp: 23.5,
+                    condition: "Cloudy",
+                    humidity: 80,
+                    windSpeed: 19,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Cloud cover increasing throughout the day."
+                },
+                {
+                    date: "2025-04-24",
+                    temperature: 23.5,
+                    highTemp: 26.1,
+                    lowTemp: 22.3,
+                    condition: "Light Rain",
+                    humidity: 85,
+                    windSpeed: 21,
+                    precipitation: 15.8,
+                    warnings: [],
+                    advice: "Light rain throughout the day. Bring an umbrella."
+                },
+                {
+                    date: "2025-04-25",
+                    temperature: 22.1,
+                    highTemp: 24.3,
+                    lowTemp: 21.0,
+                    condition: "Rainy",
+                    humidity: 90,
+                    windSpeed: 25,
+                    precipitation: 30.2,
+                    warnings: ["Flood"],
+                    advice: "Heavy rain may cause localized flooding. Avoid low-lying areas."
+                },
+                {
+                    date: "2025-04-26",
+                    temperature: 21.5,
+                    highTemp: 23.7,
+                    lowTemp: 20.4,
+                    condition: "Thunderstorm",
+                    humidity: 92,
+                    windSpeed: 33,
+                    precipitation: 45.5,
+                    warnings: ["Flood", "Storm"],
+                    advice: "Severe thunderstorms expected. Stay indoors and follow safety guidelines."
+                },
+                {
+                    date: "2025-04-27",
+                    temperature: 22.3,
+                    highTemp: 24.8,
+                    lowTemp: 21.2,
+                    condition: "Typhoon",
+                    humidity: 95,
+                    windSpeed: 45,
+                    precipitation: 65.8,
+                    warnings: ["Typhoon", "Flood", "Storm"],
+                    advice: "Typhoon approaching. Follow evacuation orders if issued."
+                },
+                {
+                    date: "2025-04-28",
+                    temperature: 23.7,
+                    highTemp: 26.2,
+                    lowTemp: 22.4,
+                    condition: "Heavy Rain",
+                    humidity: 88,
+                    windSpeed: 35,
+                    precipitation: 48.2,
+                    warnings: ["Flood", "Storm"],
+                    advice: "Typhoon moving away but heavy rain continues. Stay vigilant."
+                },
+                {
+                    date: "2025-04-29",
+                    temperature: 24.5,
+                    highTemp: 27.3,
+                    lowTemp: 23.1,
+                    condition: "Light Rain",
+                    humidity: 80,
+                    windSpeed: 22,
+                    precipitation: 18.5,
+                    warnings: [],
+                    advice: "Weather improving but some rain persists."
+                },
+                {
+                    date: "2025-04-30",
+                    temperature: 25.2,
+                    highTemp: 28.0,
+                    lowTemp: 23.8,
+                    condition: "Partly Cloudy",
+                    humidity: 75,
+                    windSpeed: 15,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Clearing conditions. Good day for outdoor activities."
+                }
+            ],
+            hmm: [
+                {
+                    date: "2025-04-19",
+                    temperature: 22.7,
+                    highTemp: 25.4,
+                    lowTemp: 21.2,
+                    condition: "Cloudy",
+                    humidity: 80,
+                    windSpeed: 16,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Cloudy conditions expected."
+                },
+                {
+                    date: "2025-04-20",
+                    temperature: 23.5,
+                    highTemp: 26.2,
+                    lowTemp: 22.1,
+                    condition: "Partly Cloudy",
+                    humidity: 76,
+                    windSpeed: 14,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Partly cloudy conditions expected."
+                },
+                {
+                    date: "2025-04-21",
+                    temperature: 24.2,
+                    highTemp: 27.0,
+                    lowTemp: 22.8,
+                    condition: "Sunny",
+                    humidity: 72,
+                    windSpeed: 13,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Sunny day ahead. Good for outdoor activities."
+                },
+                {
+                    date: "2025-04-22",
+                    temperature: 25.0,
+                    highTemp: 28.1,
+                    lowTemp: 23.2,
+                    condition: "Sunny",
+                    humidity: 68,
+                    windSpeed: 12,
+                    precipitation: 0,
+                    warnings: ["Heat"],
+                    advice: "Unusually high temperatures. Stay hydrated and use sun protection."
+                },
+                {
+                    date: "2025-04-23",
+                    temperature: 26.3,
+                    highTemp: 29.7,
+                    lowTemp: 24.5,
+                    condition: "Partly Cloudy",
+                    humidity: 72,
+                    windSpeed: 14,
+                    precipitation: 0,
+                    warnings: ["Heat"],
+                    advice: "High temperature and humidity. Potential for heat stress."
+                },
+                {
+                    date: "2025-04-24",
+                    temperature: 25.7,
+                    highTemp: 28.4,
+                    lowTemp: 23.9,
+                    condition: "Cloudy",
+                    humidity: 78,
+                    windSpeed: 17,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Increasing cloud cover expected throughout the day."
+                },
+                {
+                    date: "2025-04-25",
+                    temperature: 24.2,
+                    highTemp: 26.8,
+                    lowTemp: 22.5,
+                    condition: "Light Rain",
+                    humidity: 85,
+                    windSpeed: 19,
+                    precipitation: 12.3,
+                    warnings: [],
+                    advice: "Scattered showers expected. Bring an umbrella."
+                },
+                {
+                    date: "2025-04-26",
+                    temperature: 22.8,
+                    highTemp: 25.2,
+                    lowTemp: 21.3,
+                    condition: "Rainy",
+                    humidity: 90,
+                    windSpeed: 24,
+                    precipitation: 28.6,
+                    warnings: ["Flood"],
+                    advice: "Heavy rain may cause localized flooding. Avoid low-lying areas."
+                },
+                {
+                    date: "2025-04-27",
+                    temperature: 21.5,
+                    highTemp: 23.8,
+                    lowTemp: 20.2,
+                    condition: "Heavy Rain",
+                    humidity: 95,
+                    windSpeed: 28,
+                    precipitation: 45.2,
+                    warnings: ["Flood", "Storm"],
+                    advice: "Significant rainfall expected. Stay indoors if possible."
+                },
+                {
+                    date: "2025-04-28",
+                    temperature: 22.0,
+                    highTemp: 24.5,
+                    lowTemp: 20.8,
+                    condition: "Rainy",
+                    humidity: 92,
+                    windSpeed: 25,
+                    precipitation: 33.7,
+                    warnings: ["Flood"],
+                    advice: "Rain continuing but intensity decreasing."
+                },
+                {
+                    date: "2025-04-29",
+                    temperature: 23.1,
+                    highTemp: 25.6,
+                    lowTemp: 21.5,
+                    condition: "Light Rain",
+                    humidity: 85,
+                    windSpeed: 20,
+                    precipitation: 15.3,
+                    warnings: [],
+                    advice: "Light rain continuing. Keep umbrella handy."
+                },
+                {
+                    date: "2025-04-30",
+                    temperature: 24.3,
+                    highTemp: 27.0,
+                    lowTemp: 22.9,
+                    condition: "Partly Cloudy",
+                    humidity: 78,
+                    windSpeed: 16,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Weather improving. Good day for outdoor activities."
+                }
+            ],
+            nn: [
+                {
+                    date: "2025-04-19",
+                    temperature: 24.6,
+                    highTemp: 27.3,
+                    lowTemp: 23.0,
+                    condition: "Sunny",
+                    humidity: 71,
+                    windSpeed: 12,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "It will be sunny, so wear sunscreen!"
+                },
+                {
+                    date: "2025-04-20",
+                    temperature: 25.0,
+                    highTemp: 28.1,
+                    lowTemp: 23.5,
+                    condition: "Sunny",
+                    humidity: 69,
+                    windSpeed: 11,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Clear skies and warm temperatures expected."
+                },
+                {
+                    date: "2025-04-21",
+                    temperature: 25.7,
+                    highTemp: 28.9,
+                    lowTemp: 24.1,
+                    condition: "Sunny",
+                    humidity: 67,
+                    windSpeed: 10,
+                    precipitation: 0,
+                    warnings: ["Heat"],
+                    advice: "Very warm day. Stay hydrated and use sun protection."
+                },
+                {
+                    date: "2025-04-22",
+                    temperature: 26.4,
+                    highTemp: 29.8,
+                    lowTemp: 24.8,
+                    condition: "Partly Cloudy",
+                    humidity: 70,
+                    windSpeed: 12,
+                    precipitation: 0,
+                    warnings: ["Heat"],
+                    advice: "Unusually high temperatures. Take precautions against heat exposure."
+                },
+                {
+                    date: "2025-04-23",
+                    temperature: 25.9,
+                    highTemp: 28.7,
+                    lowTemp: 24.3,
+                    condition: "Cloudy",
+                    humidity: 75,
+                    windSpeed: 14,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Cloud cover increasing throughout the day."
+                },
+                {
+                    date: "2025-04-24",
+                    temperature: 24.5,
+                    highTemp: 27.1,
+                    lowTemp: 23.2,
+                    condition: "Light Rain",
+                    humidity: 80,
+                    windSpeed: 16,
+                    precipitation: 8.3,
+                    warnings: [],
+                    advice: "Light showers expected. Bring an umbrella."
+                },
+                {
+                    date: "2025-04-25",
+                    temperature: 23.2,
+                    highTemp: 25.8,
+                    lowTemp: 22.0,
+                    condition: "Rainy",
+                    humidity: 85,
+                    windSpeed: 20,
+                    precipitation: 22.5,
+                    warnings: [],
+                    advice: "Steady rain throughout the day. Plan indoor activities."
+                },
+                {
+                    date: "2025-04-26",
+                    temperature: 22.0,
+                    highTemp: 24.3,
+                    lowTemp: 20.8,
+                    condition: "Heavy Rain",
+                    humidity: 92,
+                    windSpeed: 28,
+                    precipitation: 42.8,
+                    warnings: ["Flood", "Storm"],
+                    advice: "Heavy rain and possible thunderstorms. Stay indoors."
+                },
+                {
+                    date: "2025-04-27",
+                    temperature: 21.3,
+                    highTemp: 23.5,
+                    lowTemp: 20.1,
+                    condition: "Thunderstorm",
+                    humidity: 95,
+                    windSpeed: 35,
+                    precipitation: 55.2,
+                    warnings: ["Flood", "Storm"],
+                    advice: "Severe thunderstorms expected. Follow safety guidelines."
+                },
+                {
+                    date: "2025-04-28",
+                    temperature: 22.1,
+                    highTemp: 24.6,
+                    lowTemp: 20.8,
+                    condition: "Heavy Rain",
+                    humidity: 90,
+                    windSpeed: 30,
+                    precipitation: 38.5,
+                    warnings: ["Flood"],
+                    advice: "Heavy rain continuing. Some roads may be impassable."
+                },
+                {
+                    date: "2025-04-29",
+                    temperature: 23.4,
+                    highTemp: 26.0,
+                    lowTemp: 21.9,
+                    condition: "Light Rain",
+                    humidity: 85,
+                    windSpeed: 22,
+                    precipitation: 15.7,
+                    warnings: [],
+                    advice: "Light rain expected. Improving conditions."
+                },
+                {
+                    date: "2025-04-30",
+                    temperature: 24.8,
+                    highTemp: 27.5,
+                    lowTemp: 23.2,
+                    condition: "Partly Cloudy",
+                    humidity: 78,
+                    windSpeed: 15,
+                    precipitation: 0,
+                    warnings: [],
+                    advice: "Mostly clear with some clouds. Good outdoor conditions."
+                }
+            ]
+        };
+        
+        // Weather alerts based on the forecast
+        const weatherAlerts = [
+            {
+                type: "warning",
+                title: "Typhoon Warning",
+                message: "Typhoon 'Mei-yu' is approaching Hong Kong around April 27. Potential for destructive winds and extreme rainfall. Stay tuned to official channels for updates.",
+                validDays: [8, 9, 10]
+            },
+            {
+                type: "caution",
+                title: "Heat Advisory",
+                message: "Unusually high temperatures expected April 21-23. Potential for heat stress. Stay hydrated and avoid prolonged sun exposure.",
+                validDays: [2, 3, 4]
+            },
+            {
+                type: "info",
+                title: "Flood Watch",
+                message: "Heavy rainfall may cause flash flooding in low-lying areas and poor drainage locations from April 24-28. Avoid flooded roads and areas.",
+                validDays: [5, 6, 7, 8, 9]
+            }
+        ];
+        
+        // Model performance metrics
+        const modelMetrics = {
+            logistic: {
+                accuracy: "85.2%",
+                auroc: "0.923",
+                precision: "0.837"
+            },
+            knn: {
+                accuracy: "82.7%",
+                auroc: "0.897",
+                precision: "0.812"
+            },
+            hmm: {
+                accuracy: "78.3%",
+                auroc: "0.856",
+                precision: "0.764"
+            },
+            nn: {
+                accuracy: "89.4%",
+                auroc: "0.942",
+                precision: "0.881"
+            }
+        };
+        
+        // Model descriptions
+        const modelDescriptions = {
+            logistic: "This model uses logistic regression to classify weather conditions based on atmospheric measurements. It performs well for forecasting general weather patterns.",
+            knn: "The K-Nearest Neighbors model predicts weather by finding the most similar historical weather patterns. It's effective at capturing local weather phenomena.",
+            hmm: "Hidden Markov Model treats weather as a sequence of hidden states, useful for capturing temporal dependencies in weather patterns. It's particularly good at modeling seasonal transitions.",
+            nn: "The Neural Network model uses deep learning to identify complex patterns in weather data. It achieves the highest accuracy among all models by learning from multiple atmospheric variables."
+        };
+        
+        // Weather icons
+        const weatherIcons = {
+            "Sunny": "☀️",
+            "Partly Cloudy": "⛅",
+            "Cloudy": "☁️",
+            "Light Rain": "🌦️",
+            "Rainy": "🌧️",
+            "Heavy Rain": "⛈️",
+            "Thunderstorm": "🌩️",
+            "Typhoon": "🌀"
+        };
+        
+        // Warning icons
+        const warningIcons = {
+            "Heat": "🔥",
+            "Flood": "🌊",
+            "Storm": "⚡",
+            "Typhoon": "🌀"
+        };
+        
+        // Alert icons
+        const alertIcons = {
+            "warning": "⚠️",
+            "caution": "⚠️",
+            "info": "ℹ️"
+        };
+        
+        // Function to update the forecast display
+        function updateForecast(model, days) {
+            const forecastContainer = document.getElementById('forecast-container');
+            forecastContainer.innerHTML = '<div class="loading">Loading forecast...</div>';
+            
+            // Update alerts based on selected days
+            updateAlerts(days);
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                forecastContainer.innerHTML = '';
+                
+                const forecast = forecastModels[model].slice(0, days);
+                
+                forecast.forEach(day => {
+                    const card = document.createElement('div');
+                    card.className = 'forecast-card';
+                    
+                    const conditionClass = day.condition.toLowerCase().replace(' ', '-');
+                    
+                    // Create warning badges HTML
+                    let warningBadgesHTML = '';
+                    if (day.warnings && day.warnings.length > 0) {
+                        day.warnings.forEach(warning => {
+                            warningBadgesHTML += `<span class="warning-badge">${warningIcons[warning] || '⚠️'} ${warning}</span>`;
+                        });
+                    }
+                    
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <div class="date">${formatDate(day.date)}${warningBadgesHTML}</div>
+                            <div class="weather-icon">${weatherIcons[day.condition] || "🌈"}</div>
+                        </div>
+                        <div class="temperature">${day.temperature.toFixed(1)}°C</div>
+                        <div class="high-low">H: ${day.highTemp.toFixed(1)}°C | L: ${day.lowTemp.toFixed(1)}°C</div>
+                        <div class="condition ${conditionClass}">${day.condition}</div>
+                        <div class="details">
+                            <div class="detail-item">
+                                <span class="detail-label">Humidity</span>
+                                <span>${day.humidity}%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Wind Speed</span>
+                                <span>${day.windSpeed} km/h</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Precipitation</span>
+                                <span>${day.precipitation} mm</span>
+                            </div>
+                        </div>
+                        <div class="advice">${day.advice}</div>
+                    `;
+                    
+                    forecastContainer.appendChild(card);
+                });
+            }, 500);
+        }
+        
+        // Function to update weather alerts
+        function updateAlerts(days) {
+            const alertsContainer = document.getElementById('alerts-container');
+            alertsContainer.innerHTML = '';
+            
+            const currentDate = new Date('2025-04-19');
+            
+            // Filter alerts relevant to the selected forecast period
+            weatherAlerts.forEach(alert => {
+                // Check if any of the alert's valid days are within the forecast range
+                const isRelevant = alert.validDays.some(day => day < days);
+                
+                if (isRelevant) {
+                    const alertElement = document.createElement('div');
+                    alertElement.className = `alert alert-${alert.type}`;
+                    
+                    alertElement.innerHTML = `
+                        <div class="alert-icon">${alertIcons[alert.type]}</div>
+                        <div class="alert-content">
+                            <div class="alert-title">${alert.title}</div>
+                            <div class="alert-message">${alert.message}</div>
+                        </div>
+                    `;
+                    
+                    alertsContainer.appendChild(alertElement);
+                }
+            });
+        }
+        
+        // Function to update model information
+        function updateModelInfo(model) {
+            document.getElementById('model-name').textContent = `${getModelFullName(model)} Model`;
+            document.getElementById('model-description').textContent = modelDescriptions[model];
+            document.getElementById('accuracy').textContent = modelMetrics[model].accuracy;
+            document.getElementById('auroc').textContent = modelMetrics[model].auroc;
+            document.getElementById('precision').textContent = modelMetrics[model].precision;
+        }
+        
+        // Function to format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = { weekday: 'short', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+        
+        // Function to get full model name
+        function getModelFullName(model) {
+            switch(model) {
+                case 'logistic': return 'Logistic Regression';
+                case 'knn': return 'K-Nearest Neighbors';
+                case 'hmm': return 'Hidden Markov Model';
+                case 'nn': return 'Neural Network';
+                default: return model;
+            }
+        }
+        
+        // Set up event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Model buttons
+            const modelButtons = document.querySelectorAll('.model-btn');
+            modelButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update active button
+                    modelButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Update forecast
+                    const model = btn.dataset.model;
+                    const days = parseInt(document.getElementById('days').value);
+                    updateForecast(model, days);
+                    updateModelInfo(model);
+                });
+            });
+            
+            // Days selector
+            document.getElementById('days').addEventListener('change', (e) => {
+                const days = parseInt(e.target.value);
+                const activeModel = document.querySelector('.model-btn.active').dataset.model;
+                updateForecast(activeModel, days);
+            });
+            
+            // Initialize with default values
+            updateForecast('logistic', 7);
+            updateModelInfo('logistic');
+        });
+    </script>
+
+
+</body></html>
